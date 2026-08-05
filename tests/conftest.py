@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import httpx
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -64,13 +65,32 @@ def problem_body(
     return body
 
 
-@pytest.fixture
-def client() -> Any:
+# One shared httpx client for the whole suite: respx intercepts every request, so
+# no connection is ever opened, and building a fresh TLS context per test is pure
+# overhead. The SDK never closes a client it did not create, which is what makes
+# this safe to reuse across `with BioFlow(...)` blocks.
+SHARED_HTTP_CLIENT = httpx.Client()
+SHARED_ASYNC_HTTP_CLIENT = httpx.AsyncClient()
+
+
+def make_client(**kwargs: Any) -> Any:
     """A sync client pointed at the respx-mocked base URL."""
     from bioflow_py import BioFlow
 
-    with BioFlow(api_key=TEST_API_KEY, base_url=TEST_BASE_URL) as bioflow:
-        yield bioflow
+    kwargs.setdefault("api_key", TEST_API_KEY)
+    kwargs.setdefault("base_url", TEST_BASE_URL)
+    kwargs.setdefault("http_client", SHARED_HTTP_CLIENT)
+    return BioFlow(**kwargs)
+
+
+def make_async_client(**kwargs: Any) -> Any:
+    """An async client pointed at the respx-mocked base URL."""
+    from bioflow_py import AsyncBioFlow
+
+    kwargs.setdefault("api_key", TEST_API_KEY)
+    kwargs.setdefault("base_url", TEST_BASE_URL)
+    kwargs.setdefault("http_client", SHARED_ASYNC_HTTP_CLIENT)
+    return AsyncBioFlow(**kwargs)
 
 
 @pytest.fixture

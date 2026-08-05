@@ -29,6 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC_PATH = REPO_ROOT / "openapi" / "v1.json"
 OUTPUT_PATH = REPO_ROOT / "src" / "bioflow_py" / "_generated" / "models.py"
 LIVE_SPEC_URL = "https://getbioflow.com/docs/api/openapi.json"
+SPEC_FETCH_USER_AGENT = "bioflow-py-spec-drift (+https://github.com/DevinoSolutions/bioflow-python)"
 
 HEADER = '''"""Wire types generated from ``openapi/v1.json`` — NEVER hand-edit.
 
@@ -86,16 +87,25 @@ def _generate_to(target: Path) -> None:
     target.write_text(HEADER + body, encoding="utf-8")
 
 
+def _download_spec() -> dict[str, object]:
+    """Fetch the published OpenAPI document.
+
+    The landing host rejects the default ``Python-urllib`` User-Agent with a 403,
+    so identify this tool explicitly.
+    """
+    request = urllib.request.Request(LIVE_SPEC_URL, headers={"User-Agent": SPEC_FETCH_USER_AGENT})
+    with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
+        return json.loads(response.read().decode("utf-8"))
+
+
 def _fetch_spec() -> None:
-    with urllib.request.urlopen(LIVE_SPEC_URL, timeout=30) as response:  # noqa: S310
-        payload = json.loads(response.read().decode("utf-8"))
+    payload = _download_spec()
     SPEC_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"fetched {LIVE_SPEC_URL} -> {SPEC_PATH.relative_to(REPO_ROOT)}")
 
 
 def _check_spec() -> int:
-    with urllib.request.urlopen(LIVE_SPEC_URL, timeout=30) as response:  # noqa: S310
-        live = json.loads(response.read().decode("utf-8"))
+    live = _download_spec()
     vendored = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
     if live == vendored:
         print("spec check: vendored openapi/v1.json matches the live document")

@@ -26,6 +26,23 @@ jobs:
       - name: ty (type check)
         run: ty check
 
+  spec-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dev dependencies
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+      - name: Generated models match the vendored spec
+        run: python scripts/regenerate.py --check
+      - name: Vendored spec matches the live document
+        # Advisory on pull requests (forks have no reason to resync the spec);
+        # a hard gate on main, where a stale vendored spec is a real defect.
+        continue-on-error: ${{ github.event_name != 'push' }}
+        run: python scripts/regenerate.py --check-spec
+
   unit-test:
     runs-on: ubuntu-latest
     strategy:

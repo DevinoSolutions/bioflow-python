@@ -1,0 +1,97 @@
+{
+  "generated_by": "packages/api/src/webhooks/signing.ts :: signWebhook (BioFlow app repo)",
+  "generator": "scripts/generate_webhook_fixtures.mjs",
+  "contract": "Standard Webhooks v1 — HMAC-SHA256 over `${id}.${timestamp}.${rawBody}`",
+  "cases": [
+    {
+      "name": "valid_single_signature",
+      "note": "The ordinary case: one active secret, one v1 entry.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo=",
+      "valid": true
+    },
+    {
+      "name": "valid_unicode_payload",
+      "note": "Signing is over the raw UTF-8 bytes, not a re-serialized object.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"page.published\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"page\":{\"id\":\"pg_1\",\"title\":\"Café ☕ — naïve\",\"slug\":\"cafe\",\"published_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,W6sYikRUW346pwODjhNj4bd1peIMvCR834X4+mXcioI=",
+      "valid": true
+    },
+    {
+      "name": "valid_during_rotation_new_secret_first",
+      "note": "Rotation sends two entries; the consumer still holds the OLD secret.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,exIAkkTd6yJEZwa2nJLXT+oNs3tzMAQaotBJKrRlnM4= v1,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo=",
+      "valid": true
+    },
+    {
+      "name": "valid_during_rotation_old_secret_first",
+      "note": "Same overlap, other order — the consumer has already stored the NEW secret.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LXR3by1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo= v1,exIAkkTd6yJEZwa2nJLXT+oNs3tzMAQaotBJKrRlnM4=",
+      "valid": true
+    },
+    {
+      "name": "invalid_tampered_body",
+      "note": "One byte changed after signing.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"attacker@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo=",
+      "valid": false
+    },
+    {
+      "name": "invalid_tampered_id",
+      "note": "The webhook-id is part of the signed string.",
+      "id": "whmsg_01JQZ9999999999999999999",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo=",
+      "valid": false
+    },
+    {
+      "name": "invalid_tampered_timestamp",
+      "note": "The timestamp is part of the signed string, so replaying it fails too.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225601,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo=",
+      "valid": false
+    },
+    {
+      "name": "invalid_wrong_secret",
+      "note": "A signature from a different endpoint's secret must never verify.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v1,qJbSP+QldJZCtK/F4HcM1fR0ra0vP64luJvbxYocOD4=",
+      "valid": false
+    },
+    {
+      "name": "invalid_no_v1_entry",
+      "note": "An unknown signature version must not be treated as a match.",
+      "id": "whmsg_01JQZ0000000000000000000",
+      "timestamp": 1767225600,
+      "payload": "{\"id\":\"whmsg_01JQZ0000000000000000000\",\"type\":\"contact.created\",\"created_at\":\"2026-01-01T00:00:00.000Z\",\"data\":{\"contact\":{\"id\":\"ct_1\",\"email\":\"fan@example.com\",\"name\":null,\"source\":\"email_capture\",\"source_block_id\":\"bl_1\",\"created_at\":\"2026-01-01T00:00:00.000Z\"}}}",
+      "secret": "whsec_c2VjcmV0LW9uZS1mb3ItYmlvZmxvdy10ZXN0cw==",
+      "signature_header": "v2,FUUKg+E4qqgvIjsE+lKXs8utkDLgd63AzkZvb9YPulo=",
+      "valid": false
+    }
+  ]
+}

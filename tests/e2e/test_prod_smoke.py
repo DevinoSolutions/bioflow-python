@@ -48,22 +48,33 @@ requires_write_leg = pytest.mark.skipif(
 
 
 @requires_test_key
-def test_usage_reports_the_meter_and_every_transport_header(prod_client: BioFlow) -> None:
+def test_usage_reports_every_meter_and_every_transport_header(prod_client: BioFlow) -> None:
     raw = prod_client.request("GET", "/v1/usage")
     assert raw.status == 200
 
     usage = raw.data
-    assert set(usage) >= {"meter", "burst"}
-    meter = usage["meter"]
-    assert {"limit", "used", "remaining", "reset_at"} <= set(meter)
-    assert meter["used"] + meter["remaining"] <= meter["limit"] + 1
+    assert set(usage) >= {"plan", "period_start", "period_end", "meters", "burst"}
+    assert usage["plan"], "the workspace plan id must be reported"
+    assert usage["period_start"] < usage["period_end"], "the billing period must move forward"
+
+    assert isinstance(usage["meters"], list)
+    assert usage["meters"], "a Creator or Pro workspace always meters at least api_requests"
+    for meter in usage["meters"]:
+        assert {"name", "used", "limit", "remaining"} <= set(meter)
+        assert meter["used"] + meter["remaining"] <= meter["limit"] + 1
+
+    assert usage["burst"]["per_minute"] > 0, "the per-key burst limit must be advertised"
 
     assert raw.request_id, "every response must carry X-Request-Id"
     assert raw.request_id.startswith("req_")
     assert raw.rate_limit is not None, "RateLimit headers must be advertised"
     assert raw.rate_limit.policy
     assert raw.rate_limit.remaining is not None
-    print(f"\nGET /v1/usage -> 200 request_id={raw.request_id} limits={raw.rate_limit}")
+    names = [meter["name"] for meter in usage["meters"]]
+    print(
+        f"\nGET /v1/usage -> 200 plan={usage['plan']} meters={names} "
+        f"request_id={raw.request_id} limits={raw.rate_limit}"
+    )
 
 
 @requires_test_key

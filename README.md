@@ -67,7 +67,7 @@ from bioflow_py import AsyncBioFlow
 async def main() -> None:
     async with AsyncBioFlow(api_key="bf_live_…") as bioflow:
         usage = await bioflow.usage.get()
-        print(usage["meter"]["remaining"])
+        print(usage["meters"][0]["remaining"])
 
         pages = await bioflow.pages.list(limit=50)
         async for page in pages:

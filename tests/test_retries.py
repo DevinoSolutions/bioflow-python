@@ -46,11 +46,11 @@ def test_rate_limited_is_retried_on_a_get_and_eventually_succeeds(
     route = respx.mock.get(f"{TEST_BASE_URL}/v1/usage").mock(
         side_effect=[
             _problem_response(429, "rate_limited"),
-            httpx.Response(200, json={"meter": {"remaining": 10}}),
+            httpx.Response(200, json={"meters": [{"name": "api_requests", "remaining": 10}]}),
         ]
     )
     with _client() as client:
-        assert client.usage.get()["meter"]["remaining"] == 10
+        assert client.usage.get()["meters"][0]["remaining"] == 10
     assert route.call_count == 2
     assert len(no_sleep) == 1
 
@@ -94,7 +94,7 @@ def test_transient_statuses_are_retried_on_a_get(status: int, no_sleep: list[flo
     route = respx.mock.get(f"{TEST_BASE_URL}/v1/usage").mock(
         side_effect=[
             _problem_response(status, "internal_error"),
-            httpx.Response(200, json={"meter": {}}),
+            httpx.Response(200, json={"meters": []}),
         ]
     )
     with _client() as client:
@@ -145,7 +145,7 @@ def test_patch_and_delete_are_never_retried_on_a_5xx(method: str, no_sleep: list
 @respx.mock
 def test_connection_errors_are_retried_on_a_get(no_sleep: list[float]) -> None:
     route = respx.mock.get(f"{TEST_BASE_URL}/v1/usage").mock(
-        side_effect=[httpx.ConnectError("boom"), httpx.Response(200, json={"meter": {}})]
+        side_effect=[httpx.ConnectError("boom"), httpx.Response(200, json={"meters": []})]
     )
     with _client() as client:
         client.usage.get()
@@ -193,7 +193,7 @@ def test_retry_after_in_seconds_is_honoured_exactly(no_sleep: list[float]) -> No
     respx.mock.get(f"{TEST_BASE_URL}/v1/usage").mock(
         side_effect=[
             _problem_response(429, "rate_limited", **{"retry-after": "7"}),
-            httpx.Response(200, json={"meter": {}}),
+            httpx.Response(200, json={"meters": []}),
         ]
     )
     with _client() as client:
@@ -212,7 +212,7 @@ def test_retry_after_as_an_http_date_is_honoured(no_sleep: list[float]) -> None:
             _problem_response(
                 429, "rate_limited", **{"retry-after": formatdate(_time.time() + 45, usegmt=True)}
             ),
-            httpx.Response(200, json={"meter": {}}),
+            httpx.Response(200, json={"meters": []}),
         ]
     )
     with _client() as client:
@@ -250,7 +250,7 @@ def test_max_retries_can_be_raised_for_a_single_call(no_sleep: list[float]) -> N
             _problem_response(429, "rate_limited"),
             _problem_response(429, "rate_limited"),
             _problem_response(429, "rate_limited"),
-            httpx.Response(200, json={"meter": {}}),
+            httpx.Response(200, json={"meters": []}),
         ]
     )
     with _client(max_retries=0) as client:
@@ -266,7 +266,7 @@ def test_backoff_grows_and_stays_jittered_within_the_documented_envelope(
         side_effect=[
             _problem_response(500, "internal_error"),
             _problem_response(500, "internal_error"),
-            httpx.Response(200, json={"meter": {}}),
+            httpx.Response(200, json={"meters": []}),
         ]
     )
     with _client(max_retries=2) as client:
@@ -291,7 +291,7 @@ async def test_the_async_client_applies_the_same_retry_matrix(no_sleep: list[flo
     route = respx.mock.get(f"{TEST_BASE_URL}/v1/usage").mock(
         side_effect=[
             _problem_response(429, "rate_limited"),
-            httpx.Response(200, json={"meter": {}}),
+            httpx.Response(200, json={"meters": []}),
         ]
     )
     async with make_async_client() as client:

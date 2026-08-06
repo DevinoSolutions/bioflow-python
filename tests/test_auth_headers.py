@@ -12,7 +12,7 @@ from conftest import TEST_API_KEY, TEST_BASE_URL
 
 def _usage_route(respx_mock: respx.MockRouter) -> respx.Route:
     return respx_mock.get(f"{TEST_BASE_URL}/v1/usage").mock(
-        return_value=httpx.Response(200, json={"meter": {}})
+        return_value=httpx.Response(200, json={"meters": []})
     )
 
 

@@ -132,7 +132,7 @@ CASES: list[Case] = [
         {"status": "PUBLISHED"},
         lambda c: c.pages.publish("pg_1"),
     ),
-    ("getUsage", "GET", "/v1/usage", "", {}, 200, {"meter": {}}, lambda c: c.usage.get()),
+    ("getUsage", "GET", "/v1/usage", "", {}, 200, {"meters": []}, lambda c: c.usage.get()),
     (
         "listWebhookEndpoints",
         "GET",

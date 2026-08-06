@@ -69,7 +69,9 @@ def test_matching_methods_take_the_same_parameters(namespace: str) -> None:
 
 @respx.mock
 async def test_the_async_client_returns_the_same_payload_as_the_sync_one() -> None:
-    payload = {"meter": {"limit": 10_000, "used": 12, "remaining": 9_988}}
+    payload = {
+        "meters": [{"name": "api_requests", "limit": 10_000, "used": 12, "remaining": 9_988}]
+    }
     respx.mock.get(f"{TEST_BASE_URL}/v1/usage").mock(return_value=httpx.Response(200, json=payload))
     with _sync_client() as sync_client:
         sync_result = sync_client.usage.get()

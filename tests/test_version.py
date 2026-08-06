@@ -13,4 +13,4 @@ def test_version_is_a_semver_string() -> None:
 
 
 def test_version_matches_installed_distribution_metadata() -> None:
-    assert metadata.version("bioflow-py") == bioflow_py.__version__
+    assert metadata.version("bioflow-sdk") == bioflow_py.__version__

@@ -29,7 +29,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 SPEC_PATH = REPO_ROOT / "openapi" / "v1.json"
 OUTPUT_PATH = REPO_ROOT / "src" / "bioflow_py" / "_generated" / "models.py"
 LIVE_SPEC_URL = "https://getbioflow.com/docs/api/openapi.json"
-SPEC_FETCH_USER_AGENT = "bioflow-py-spec-drift (+https://github.com/DevinoSolutions/bioflow-python)"
+SPEC_FETCH_USER_AGENT = (
+    "bioflow-sdk-spec-drift (+https://github.com/DevinoSolutions/bioflow-python)"
+)
 
 HEADER = '''"""Wire types generated from ``openapi/v1.json`` — NEVER hand-edit.
 

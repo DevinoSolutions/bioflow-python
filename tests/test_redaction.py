@@ -36,7 +36,7 @@ def test_debug_output_never_contains_the_api_key() -> None:
     assert lines, "debug sink received nothing"
     joined = "\n".join(lines)
     assert LIVE_KEY not in joined
-    assert "[bioflow-py]" in joined
+    assert "[bioflow-sdk]" in joined
 
 
 @respx.mock
@@ -45,7 +45,7 @@ def test_debug_true_writes_redacted_lines_to_stderr(capsys: pytest.CaptureFixtur
     with make_client(api_key=LIVE_KEY, debug=True) as client:
         client.usage.get()
     captured = capsys.readouterr()
-    assert "[bioflow-py]" in captured.err
+    assert "[bioflow-sdk]" in captured.err
     assert LIVE_KEY not in captured.err
 
 

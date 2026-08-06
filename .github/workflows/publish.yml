@@ -1,15 +1,15 @@
-# This workflow uses PyPI Trusted Publishing (OIDC) — no API token/password. It will
-# FAIL until a trusted publisher for the `bioflow-py` project is registered on PyPI.
-# `bioflow-py` does not exist on PyPI yet, so use the PENDING publisher form at
-# https://pypi.org/manage/account/publishing/ (not the per-project form):
-#   PyPI Project Name: bioflow-py
+# This workflow uses PyPI Trusted Publishing (OIDC) — no API token/password.
+#
+# The trusted publisher is registered on PyPI as:
+#   PyPI Project Name: bioflow-sdk      <- the DISTRIBUTION name; the import package
+#                                          stays `bioflow_py`
 #   Owner:             DevinoSolutions
 #   Repository name:   bioflow-python
 #   Workflow name:     publish.yml
-#   Environment name:  pypi
-# The `pypi` environment must also exist in this repo (Settings -> Environments)
-# or the OIDC claim will not match.
-# Do NOT dispatch this workflow before that is done.
+#   Environment name:  (any)
+# Any mismatch between those claims and this file fails the OIDC exchange with
+# `invalid-publisher`. The `pypi` environment below is allowed because the publisher
+# was registered without an environment restriction.
 name: Publish
 
 on:

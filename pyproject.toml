@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "bioflow-py"
+name = "bioflow-sdk"
 dynamic = ["version"]
 description = "Official Python SDK for the BioFlow public API (link-in-bio pages, contacts, files, analytics, webhooks)."
 readme = "README.md"

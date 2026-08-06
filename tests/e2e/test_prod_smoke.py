@@ -160,7 +160,7 @@ def test_replaying_an_idempotency_key_returns_the_same_resource(
     prod_write_client: BioFlow,
 ) -> None:
     key = f"e2e-{uuid.uuid4()}"
-    title = f"bioflow-py e2e {uuid.uuid4().hex[:8]}"
+    title = f"bioflow-sdk e2e {uuid.uuid4().hex[:8]}"
     first = prod_write_client.request(
         "POST", "/v1/pages", body={"title": title}, idempotency_key=key
     )
@@ -179,7 +179,7 @@ def test_replaying_an_idempotency_key_returns_the_same_resource(
 
 @requires_write_leg
 def test_a_page_can_be_built_published_and_deleted(prod_write_client: BioFlow) -> None:
-    page = prod_write_client.pages.create({"title": f"bioflow-py e2e {uuid.uuid4().hex[:8]}"})
+    page = prod_write_client.pages.create({"title": f"bioflow-sdk e2e {uuid.uuid4().hex[:8]}"})
     page_id = page["id"]
     try:
         with_block = prod_write_client.pages.add_block(
@@ -197,7 +197,7 @@ def test_a_page_can_be_built_published_and_deleted(prod_write_client: BioFlow) -
 
 @requires_write_leg
 def test_a_stale_concurrency_stamp_is_refused(prod_write_client: BioFlow) -> None:
-    page = prod_write_client.pages.create({"title": f"bioflow-py e2e {uuid.uuid4().hex[:8]}"})
+    page = prod_write_client.pages.create({"title": f"bioflow-sdk e2e {uuid.uuid4().hex[:8]}"})
     try:
         with pytest.raises(ConflictError) as excinfo:
             prod_write_client.pages.update(

@@ -1,4 +1,4 @@
-# bioflow-py
+# bioflow-sdk
 
 The official Python SDK for the [BioFlow](https://getbioflow.com) public API — link-in-bio
 pages, captured contacts, files, analytics and Standard-Webhooks endpoints, with typed errors,
@@ -7,8 +7,19 @@ cursor pagination, idempotent writes and a retry policy that mirrors the server'
 Sync and async clients, `httpx` as the only runtime dependency, full type hints (`py.typed`).
 
 ```bash
-pip install bioflow-py
+pip install bioflow-sdk
 ```
+
+> **The distribution name and the import name differ.** Install `bioflow-sdk`, then
+> `import bioflow_py`:
+>
+> ```python
+> # pip install bioflow-sdk
+> from bioflow_py import BioFlow
+> ```
+>
+> The PyPI project is **`bioflow-sdk`**; the importable Python package stays **`bioflow_py`**
+> throughout this README and in every code sample below.
 
 Requires Python 3.10+. The API reference lives at
 <https://getbioflow.com/docs/api/reference>; a TypeScript SDK with the same surface is

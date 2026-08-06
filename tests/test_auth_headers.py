@@ -44,7 +44,7 @@ def test_every_request_identifies_the_sdk_and_asks_for_json() -> None:
     request = route.calls.last.request
     assert request.headers["x-bioflow-client"] == USER_AGENT
     assert request.headers["user-agent"] == USER_AGENT
-    assert USER_AGENT.startswith("bioflow-py/")
+    assert USER_AGENT.startswith("bioflow-sdk/")
     assert request.headers["accept"] == "application/json"
 
 

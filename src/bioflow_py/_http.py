@@ -53,7 +53,7 @@ DEFAULT_TIMEOUT = 30.0
 DEFAULT_MAX_RETRIES = 2
 DEFAULT_MAX_RETRY_AFTER = 60.0
 API_KEY_ENV_VAR = "BIOFLOW_API_KEY"
-USER_AGENT = f"bioflow-py/{__version__}"
+USER_AGENT = f"bioflow-sdk/{__version__}"
 
 AuthStyle = Literal["bearer", "x-api-key"]
 
@@ -405,7 +405,7 @@ class _TransportCore:
     def _log(self, line: str) -> None:
         if not self._debug:
             return
-        message = redact_secrets(f"[bioflow-py] {line}")
+        message = redact_secrets(f"[bioflow-sdk] {line}")
         if callable(self._debug):
             self._debug(message)
         else:
